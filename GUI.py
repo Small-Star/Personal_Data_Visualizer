@@ -16,6 +16,8 @@ from vis_records import *
 from vis_weightlifting import *
 from vis_mood import *
 
+import collections
+
 class gFrame(wx.Frame):
     
     def __init__(self, *args, **kwargs):
@@ -75,6 +77,7 @@ class gFrame(wx.Frame):
 class Nbk(wx.Notebook):
     def __init__(self, parent, nodes):
         wx.Notebook.__init__(self, parent, id=wx.ID_ANY, style=wx.BK_DEFAULT)
+        print "OC " + str(type(nodes))
         bodytab = Tab_Body(self, nodes)
         diettab = Tab_Diet(self, nodes)
         lifttab = Tab_Lift(self, nodes)
@@ -133,7 +136,7 @@ class File_Read_Dlg(wx.Dialog):
     def InitUI(self):
         pnl = wx.Panel(self)
         
-        self.nodes = {}
+        self.nodes = collections.OrderedDict()
         
         self.bold_font = wx.Font(10, wx.MODERN, wx.BOLD, wx.NORMAL, False, u'Consolas')
 
@@ -179,7 +182,7 @@ class File_Read_Dlg(wx.Dialog):
         self.lab_m_read.SetLabel('Mood Info: NOT READ                                ')
         
         self.lab_status.SetLabel("Status: Init")
-        day_nodes = {}
+        day_nodes = collections.OrderedDict() 
         print "Reading diet info..."
         self.lab_status.SetLabel("Status: Reading diet info...")
         self.lab_status.Show(False)
@@ -196,7 +199,7 @@ class File_Read_Dlg(wx.Dialog):
         print "Reading records info..."
         self.lab_status.SetLabel("Status: Reading records info...")
         self.lab_status.Update()
-        day_nodes = read_data_records(day_nodes = day_nodes)
+        #day_nodes = read_data_records(day_nodes = day_nodes)
         self.lab_r_read.SetLabel("Records Info: SUCCESSFULLY READ")
         self.lab_r_read.Update()
         print "Reading weightlifting info..."
@@ -214,6 +217,8 @@ class File_Read_Dlg(wx.Dialog):
         self.lab_status.SetLabel("Status: FINISHED")
 
         self.nodes = day_nodes
+        print type(day_nodes)        
+        print type(self.nodes)
     
     def get_nodes(self):
         return self.nodes

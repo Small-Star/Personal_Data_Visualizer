@@ -72,7 +72,7 @@ class Tab_Goal(wx.Panel):
         self.Show(True)
         
     def draw(self, n=5):
-        nodes_ = self.nodelist
+        nodes_ = sort_nodes(self.nodelist) #HACK: FIX (nodes are coming unsorted somewhere, which was causing problems drawing rects
         '''Takes in a list of goals, plots the statuses as a stacked time series'''
         #subset_nodes(self.nodelist, beg=datetime.date(2014,2,22),dp=False)
         #Don't bother to pass the number of taps, just read it out

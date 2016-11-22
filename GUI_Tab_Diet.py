@@ -102,7 +102,7 @@ class Tab_Diet(wx.Panel):
         self.Show(True)
         
     def draw(self,n=5):
-        nodes = self.nodelist
+        nodes = sort_nodes(self.nodelist) #HACK: FIX (nodes are coming unsorted somewhere, which was causing problems drawing rects
         
         #Don't bother to pass the number of taps, just read it out
         spv = self.spin_taps.GetValue()

@@ -29,13 +29,16 @@ def moving_avg(series,n=5,use_float=False):
 def create_bg_rects(nodes,height,bottom=0.0):
     '''Takes a list of input nodes and returns rects colored based on FIC, with the height passed in'''
         
+    print "BGR" + str(type(nodes))
     rect_array = []
     
     dates =[nodes[node].get_date() for node in nodes]
     fics = [nodes[node].get_fic() for node in nodes]
     
+    #print dates
     #Set up BG ranges for FICs
     lbound = 0
+    last_ubound = 0
     
     for f in range(len(fics)):
         if fics[f] != fics[lbound]: #if tested fic is different than the fic at the beginning of the range, there is a change
@@ -45,19 +48,19 @@ def create_bg_rects(nodes,height,bottom=0.0):
                 color = '#86cecb'
             elif fics[lbound] == 'B':
                 color = '#7a7aff'
-            
-            #Weird data error - seemed to be reading input file correctly, but was getting an off by one error when drawing this particular rect
-            if dates[lbound].__str__()=="2014-08-10":
-                rect = pylab.Rectangle((dates[lbound], bottom), 63, height - bottom,facecolor = color)
-                rect_array.append(rect)
-                lbound = f
-            else:
-                rect = pylab.Rectangle((dates[lbound], bottom), f - lbound, height - bottom,facecolor = color)
-                rect_array.append(rect)
-                last_ubound = f
-                #print "rect created at " + str(lbound) + " to " + str(f) + " for " + str(fics[lbound])
-                lbound = f
 
+            #Weird data error - seemed to be reading input file correctly, but was getting an off by one error when drawing this particular rect
+            #NOTE: Sorting the nodelist seems to have fixed this
+            #if dates[lbound].__str__()=="2014-08-10":
+            #    rect = pylab.Rectangle((dates[lbound], bottom), 63, height - bottom,facecolor = color)
+            #    rect_array.append(rect)
+            #    lbound = f
+            #else:
+            rect = pylab.Rectangle((dates[lbound], bottom), f - lbound, height - bottom,facecolor = color)
+            rect_array.append(rect)
+            last_ubound = f
+            #print "rect created at " + str(lbound) + " to " + str(f) + " for " + str(fics[lbound])
+            lbound = f
     
     #Create final rect
     if fics[lbound] == 'M':
@@ -66,6 +69,7 @@ def create_bg_rects(nodes,height,bottom=0.0):
         color = '#86cecb'
     elif fics[lbound] == 'B':
         color = '#7a7aff'
+        
     rect = pylab.Rectangle((dates[last_ubound], bottom), len(fics) - last_ubound, height - bottom,facecolor = color)
     rect_array.append(rect)
     

@@ -4,6 +4,8 @@ Created on Jun 6, 2016
 '''
 import wx
 import datetime
+import collections
+
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
 from matplotlib.backends.backend_wx import NavigationToolbar2Wx
         
@@ -90,4 +92,8 @@ def subset_nodes(nodelist, beg=datetime.date(1001,1,1), end=datetime.date(3001,1
 
 def datepicker_to_datetime(d):
     return datetime.date(d.GetYear(),d.GetMonth()+1,d.GetDay()) #For whatever reason, there is an off by one error. +1 is a hacky fix.
+
+def sort_nodes(nodes):
+    nodes_ = collections.OrderedDict(sorted(nodes.iteritems(), key=lambda x: x[0]))
+    return nodes_
 
