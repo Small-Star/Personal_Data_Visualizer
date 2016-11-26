@@ -13,6 +13,8 @@ import datetime
 from visualizer_node_lib import *
 from vis_graphs_lib import *
 
+import collections
+
 def read_data_diet(day_nodes, drive_path = DRIVE_PATH):
     ''' Inputs: Dict consisting of nodes corresponding to days with data. May be unfilled, filled, or partially filled.
                 Drive path in which files are located
@@ -37,7 +39,7 @@ class Diet_HTML_Parser(HTMLParser):
         self.calorie_intake = []
         self.protein_intake = []
         self.tdee = []
-        self.day_nodes = {}
+        self.day_nodes = collections.OrderedDict()
                 
         self.date_re = re.compile(r'- \d\d\/\d\d\/\d\d\d\d')      #ex: '03/22/2014'
         self.calorie_intake_re = re.compile(r'\s*Intake: ')
@@ -77,6 +79,7 @@ class Diet_HTML_Parser(HTMLParser):
     def get_tdee(self):
         return self.tdee
     def get_nodes(self):
+        print "VD" + str(type(self.day_nodes))
         return self.day_nodes
         
 def simple_graph(series1,series2):

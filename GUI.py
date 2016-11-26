@@ -77,7 +77,6 @@ class gFrame(wx.Frame):
 class Nbk(wx.Notebook):
     def __init__(self, parent, nodes):
         wx.Notebook.__init__(self, parent, id=wx.ID_ANY, style=wx.BK_DEFAULT)
-        print "OC " + str(type(nodes))
         bodytab = Tab_Body(self, nodes)
         diettab = Tab_Diet(self, nodes)
         lifttab = Tab_Lift(self, nodes)
@@ -217,8 +216,6 @@ class File_Read_Dlg(wx.Dialog):
         self.lab_status.SetLabel("Status: FINISHED")
 
         self.nodes = day_nodes
-        print type(day_nodes)        
-        print type(self.nodes)
     
     def get_nodes(self):
         return self.nodes

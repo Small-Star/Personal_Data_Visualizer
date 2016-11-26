@@ -29,7 +29,6 @@ def moving_avg(series,n=5,use_float=False):
 def create_bg_rects(nodes,height,bottom=0.0):
     '''Takes a list of input nodes and returns rects colored based on FIC, with the height passed in'''
         
-    print "BGR" + str(type(nodes))
     rect_array = []
     
     dates =[nodes[node].get_date() for node in nodes]
@@ -75,3 +74,57 @@ def create_bg_rects(nodes,height,bottom=0.0):
     
     return rect_array
     
+def create_mood_rects(dates,mood_u,mood_l,mood_s,a_or_v,plot_rep_bars):
+    rect_array = []
+    
+    def_alpha_factor = .45
+    
+    if plot_rep_bars:
+        alpha_factor = 0.0
+    else:
+        alpha_factor = def_alpha_factor
+    
+    if a_or_v == "activation":
+        u_color = '#ff6f69'
+        m_color = '#cc5854'
+        l_color = '#99423f'
+        
+    if a_or_v == "valence":
+        u_color = '#8dac9a'
+        m_color = '#70897b'
+        l_color = '#54675c'
+    
+    #Divide mood into thirds (upper, middle, lower) and create rects for each
+    for d in range(len(dates)):
+        u_third = mood_u[d] - (mood_u[d] - mood_l[d])/3.
+        l_third = mood_u[d] - (mood_u[d] - mood_l[d])*2/3.
+        
+        height = (mood_u[d] - mood_l[d])/3.
+        
+        rect_u = pylab.Rectangle((dates[d], u_third), 1, height,facecolor = u_color)
+        rect_m = pylab.Rectangle((dates[d], l_third), 1, height,facecolor = m_color)
+        rect_l = pylab.Rectangle((dates[d], mood_l[d]), 1, height,facecolor = l_color)
+        
+    #Emphasize the representative third
+        if mood_s[d] == 'U':
+            rect_m.set_alpha(alpha_factor)
+            rect_l.set_alpha(alpha_factor)
+        elif mood_s[d] == 'M':
+            rect_u.set_alpha(alpha_factor)
+            rect_l.set_alpha(alpha_factor)
+        elif mood_s[d] == 'L':
+            rect_u.set_alpha(alpha_factor)
+            rect_m.set_alpha(alpha_factor)
+        elif mood_s[d] == 'N':
+            rect_u.set_alpha(1)
+            rect_u.set_facecolor(m_color)
+            rect_m.set_alpha(1)
+            rect_m.set_facecolor(m_color)
+            rect_l.set_alpha(1)
+            rect_l.set_facecolor(m_color)
+            
+        rect_array.append(rect_u)
+        rect_array.append(rect_m)
+        rect_array.append(rect_l)    
+        
+    return rect_array        
