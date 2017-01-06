@@ -79,7 +79,11 @@ class Tab_Mood(wx.Panel):
         self.cb_v = wx.CheckBox(l_vbox_pan, label='Valence', pos=(20, 20))
         self.cb_v.SetValue(True)
         self.cb_v.Bind(wx.EVT_CHECKBOX, self.PlotOpts)
-        
+
+        self.cb_lobe = wx.CheckBox(l_vbox_pan, label='Line (Best Estimate)', pos=(20, 20))
+        self.cb_lobe.SetValue(False)
+        self.cb_lobe.Bind(wx.EVT_CHECKBOX, self.PlotOpts)
+                
         self.cb_bars = wx.CheckBox(l_vbox_pan, label='Show Bars', pos=(20, 20))
         self.cb_bars.SetValue(False)
         self.cb_bars.Bind(wx.EVT_CHECKBOX, self.PlotOpts)
@@ -94,6 +98,7 @@ class Tab_Mood(wx.Panel):
         self.lvp_sizer.Add(h_line,0,wx.EXPAND | wx.ALL, border = 5) 
         self.lvp_sizer.Add(self.cb_a,0, flag=wx.EXPAND | wx.ALL, border = 5) 
         self.lvp_sizer.Add(self.cb_v,0, flag=wx.EXPAND | wx.ALL, border = 5) 
+        self.lvp_sizer.Add(self.cb_lobe,0, flag=wx.EXPAND | wx.ALL, border = 5) 
         self.lvp_sizer.Add(self.cb_bars,0, flag=wx.EXPAND | wx.ALL, border = 5)
         self.lvp_sizer.Add(self.cb_rep_bars,0, flag=wx.EXPAND | wx.ALL, border = 5)
         self.lvp_sizer.Add(h_line,0,wx.EXPAND | wx.ALL, border = 10) 
@@ -123,7 +128,7 @@ class Tab_Mood(wx.Panel):
     def PlotOpts(self,e): 
         self.main_sizer.Remove(self.r_sizer)
         
-        self.draw(plot_activation=self.cb_a.GetValue(),plot_valence=self.cb_v.GetValue(),plot_bars=self.cb_bars.GetValue(),plot_rep_bars=self.cb_rep_bars.GetValue())   
+        self.draw(plot_activation=self.cb_a.GetValue(),plot_valence=self.cb_v.GetValue(),plot_lobe=self.cb_lobe.GetValue(),plot_bars=self.cb_bars.GetValue(),plot_rep_bars=self.cb_rep_bars.GetValue())   
 
         self.r_sizer = fig_pan(self)
  
@@ -132,7 +137,7 @@ class Tab_Mood(wx.Panel):
  
         self.Show(True)
     
-    def draw(self, n=5, plot_activation=True,plot_valence=True, plot_bars=True, plot_rep_bars=False):
+    def draw(self, n=5, plot_activation=True,plot_valence=True, plot_lobe=False, plot_bars=True, plot_rep_bars=False):
         nodes = sort_nodes(self.nodelist) #HACK: FIX (nodes are coming unsorted somewhere, which was causing problems drawing rects
         
         color_activation = '#99423f'
@@ -155,6 +160,10 @@ class Tab_Mood(wx.Panel):
             v_l = [x[1][0] for x in moods]
             v_u = [x[1][1] for x in moods]
             v_s = [x[1][2] for x in moods]
+            
+        if plot_lobe:
+            a_lobe = map(lambda x: ((x[0][1] - x[0][0])*.8 + x[0][0]) if x[0][2] == ('U') else ((x[0][1] - x[0][0])*.2 + x[0][0]) if x[0][2] == ('L') else ((x[0][1] - x[0][0])*.5 + x[0][0]), moods)
+            v_lobe = map(lambda x: ((x[1][1] - x[1][0])*.8 + x[1][0]) if x[1][2] == ('U') else ((x[1][1] - x[1][0])*.2 + x[1][0]) if x[1][2] == ('L') else ((x[1][1] - x[1][0])*.5 + x[1][0]), moods)
 
         if plot_activation:        
             a_mid = [sum(x)/2.0 for x in zip(a_l, a_u)]
@@ -191,19 +200,27 @@ class Tab_Mood(wx.Panel):
             for r in rects:
                 ax_array.add_patch(r)
         
-        if plot_activation:
+        if plot_activation and not plot_lobe:
             ax_array.plot_date(dates,a_l,marker='x',linestyle=' ',color=color_activation,label = 'Activation (LB)')
             ax_array.plot_date(dates,moving_avg(a_l,n,True),marker='',linestyle='-', linewidth=3,color=color_activation,label = 'Moving Avg. (' + str(n) + ') taps')
             ax_array.plot_date(dates,a_u,marker='x',linestyle=' ',color=color_activation,label = 'Activation (UB)')
             ax_array.plot_date(dates,moving_avg(a_u,n,True),marker='',linestyle='-', linewidth=3,color=color_activation,label = 'Moving Avg. (' + str(n) + ') taps')
+            
+        if plot_activation and plot_lobe:
+            ax_array.plot_date(dates,a_lobe,marker='x',linestyle=' ',color=color_activation,label = 'Activation (Best Estimate)')
+            ax_array.plot_date(dates,moving_avg(a_lobe,n,True),marker='',linestyle='-', linewidth=5,color=color_activation,label = 'Moving Avg. (' + str(n) + ') taps')                
 
-        if plot_valence:
+        if plot_valence and not plot_lobe:
             ax_array.plot_date(dates,v_l,marker='x',linestyle=' ',color=color_valence,label = 'Valence (LB)')
             ax_array.plot_date(dates,moving_avg(v_l,n,True),marker='',linestyle='-', linewidth=3,color=color_valence,label = 'Moving Avg. (' + str(n) + ') taps')
             ax_array.plot_date(dates,v_u,marker='x',linestyle=' ',color=color_valence,label = 'Valence (UB)')
             ax_array.plot_date(dates,moving_avg(v_u,n,True),marker='',linestyle='-', linewidth=3,color=color_valence,label = 'Moving Avg. (' + str(n) + ') taps')
+            
+        if plot_valence and plot_lobe:
+            ax_array.plot_date(dates,v_lobe,marker='x',linestyle=' ',color=color_valence,label = 'Valence (Best Estimate)')
+            ax_array.plot_date(dates,moving_avg(v_lobe,n,True),marker='',linestyle='-', linewidth=5,color=color_valence,label = 'Moving Avg. (' + str(n) + ') taps')   
         ax_array.set_ylim([1,9])
-
+            
         ax_array.set_title('Mood (Circumplex Model)')        
         ax_array.set_ylabel('Intensity')
         ax_array.legend(loc='upper left', shadow=True, fontsize='small')
