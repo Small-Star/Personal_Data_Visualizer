@@ -43,48 +43,52 @@ class Weightlifting_HTML_Parser(HTMLParser):
         self.lift_re = re.compile(r' - ')
                 
     def handle_data(self, data):
-        if re.match(self.date_str_re,data) != None:
-            self.cr_date = datetime.date(int(data[-5:-1]),int(data[:2]),int(data[3:5]))
-        elif re.match(self.start_time_re,data) != None:
-            st_time = datetime.datetime(self.cr_date.year,self.cr_date.month,self.cr_date.day,int(data[13:15]),int(data[16:]))
-            self.lines.append((self.cr_date,'STARTTIME',st_time))
-        elif re.match(self.end_time_re,data) != None:
-            e_time = datetime.datetime(int(data[23:]),int(data[17:19]),int(data[20:22]),int(data[11:13]),int(data[14:16]))
-            self.lines.append((self.cr_date,'ENDTIME',e_time))
-        elif re.match(self.weight_re,data) != None:
-            d = re.split('lbs',data[9:])[0]
-            if re.match('\d',d) != None:        #Check to make sure the weight is an actual value, and  is not N/A
-                d = float(d)
-                self.lines.append((self.cr_date,'WEIGHT',d))
-        elif re.match(self.bodyfat_re,data) != None:
-            if data[-1:] == '%':     #Don't use bodyfats measured in mms; just drop those
-                self.lines.append((self.cr_date,'BODYFAT',float(data[10:-1])))
-        elif re.match(self.type_re,data) != None:
-            self.lines.append((self.cr_date,'TYPE',data[9:]))
-        elif re.match(self.cardio_flag_re,data) != None:
-            self.corl_flag = 'C'
-        elif re.match(self.lifting_flag_re,data) != None:
-            self.corl_flag = 'L'
-        elif re.match(self.rating_re,data) != None:
-            self.lines.append((self.cr_date,'RATING',data[8:]))
-        elif re.match(self.notes_re,data) != None:
-            self.lines.append((self.cr_date,'NOTES',data[7:]))
+        try:
+            if re.match(self.date_str_re,data) != None:
+                self.cr_date = datetime.date(int(data[-5:-1]),int(data[:2]),int(data[3:5]))
+            elif re.match(self.start_time_re,data) != None:
+                st_time = datetime.datetime(self.cr_date.year,self.cr_date.month,self.cr_date.day,int(data[13:15]),int(data[16:]))
+                self.lines.append((self.cr_date,'STARTTIME',st_time))
+            elif re.match(self.end_time_re,data) != None:
+                e_time = datetime.datetime(int(data[23:]),int(data[17:19]),int(data[20:22]),int(data[11:13]),int(data[14:16]))
+                self.lines.append((self.cr_date,'ENDTIME',e_time))
+            elif re.match(self.weight_re,data) != None:
+                d = re.split('lbs',data[9:])[0]
+                if re.match('\d',d) != None:        #Check to make sure the weight is an actual value, and  is not N/A
+                    d = float(d)
+                    self.lines.append((self.cr_date,'WEIGHT',d))
+            elif re.match(self.bodyfat_re,data) != None:
+                if data[-1:] == '%':     #Don't use bodyfats measured in mms; just drop those
+                    self.lines.append((self.cr_date,'BODYFAT',float(data[10:-1])))
+            elif re.match(self.type_re,data) != None:
+                self.lines.append((self.cr_date,'TYPE',data[9:]))
+            elif re.match(self.cardio_flag_re,data) != None:
+                self.corl_flag = 'C'
+            elif re.match(self.lifting_flag_re,data) != None:
+                self.corl_flag = 'L'
+            elif re.match(self.rating_re,data) != None:
+                self.lines.append((self.cr_date,'RATING',data[8:]))
+            elif re.match(self.notes_re,data) != None:
+                self.lines.append((self.cr_date,'NOTES',data[7:]))
 
-        elif re.match(self.lift_re,data) != None:
-            if self.corl_flag == 'C':                       #Cardio
-                d = data.split(' - ')
-                self.lines.append((self.cr_date,'CARDIO',(d[1],d[-1])))   #tuple is type, duration (can be floors or minutes)
-            elif self.corl_flag == 'L':
-                d = data.split(' - ')           #Splits into '', Lift Name, Lifts
-                l = d[2].split(', ')            #Splits Lifts by csv
-                for el in l:
-                    if len(el.split('x')) == 2: #This is not a multi-set lift
-                        self.lines.append((self.cr_date,'LIFT',(d[1],el)))                              #Appends a tuple of (Lift Name, Weightxrep)
-                    elif len(el.split('x')) == 3: #This is a multi-set lift
-                        for x in range(int(re.split('[IF]',el.split('x')[-1])[0])):
-                            reconstituted_el = str(el.split('x')[0] + 'x' + el.split('x')[1])           #Make a number of entries corresponding to the third value
-                            self.lines.append((self.cr_date,'LIFT',(d[1],reconstituted_el)))            #Appends a tuple of (Lift Name, Weightxrep)
-       
+            elif re.match(self.lift_re,data) != None:
+                if self.corl_flag == 'C':                       #Cardio
+                    d = data.split(' - ')
+                    self.lines.append((self.cr_date,'CARDIO',(d[1],d[-1])))   #tuple is type, duration (can be floors or minutes)
+                elif self.corl_flag == 'L':
+                    d = data.split(' - ')           #Splits into '', Lift Name, Lifts
+                    l = d[2].split(', ')            #Splits Lifts by csv
+                    for el in l:
+                        if len(el.split('x')) == 2: #This is not a multi-set lift
+                            self.lines.append((self.cr_date,'LIFT',(d[1],el)))                              #Appends a tuple of (Lift Name, Weightxrep)
+                        elif len(el.split('x')) == 3: #This is a multi-set lift
+                            for x in range(int(re.split('[IF]',el.split('x')[-1])[0])):
+                                reconstituted_el = str(el.split('x')[0] + 'x' + el.split('x')[1])           #Make a number of entries corresponding to the third value
+                                self.lines.append((self.cr_date,'LIFT',(d[1],reconstituted_el)))            #Appends a tuple of (Lift Name, Weightxrep)
+        except ValueError:
+            print "Value Error (Weightlifting): " + data
+        except IndexError:
+            print "Index Error (Weightlifting): " + self.cr_date
       
     def update_nodes(self,day_nodes):
         bnode = body_node()

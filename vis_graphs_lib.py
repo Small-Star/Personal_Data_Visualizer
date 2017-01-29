@@ -47,6 +47,8 @@ def create_bg_rects(nodes,height,bottom=0.0):
                 color = '#86cecb'
             elif fics[lbound] == 'B':
                 color = '#7a7aff'
+            elif fics[lbound] == 'FB':
+                color = '#016773'
 
             #Weird data error - seemed to be reading input file correctly, but was getting an off by one error when drawing this particular rect
             #NOTE: Sorting the nodelist seems to have fixed this
@@ -68,6 +70,8 @@ def create_bg_rects(nodes,height,bottom=0.0):
         color = '#86cecb'
     elif fics[lbound] == 'B':
         color = '#7a7aff'
+    elif fics[lbound] == 'FB':
+        color = '#016773'
         
     rect = pylab.Rectangle((dates[last_ubound], bottom), len(fics) - last_ubound, height - bottom,facecolor = color)
     rect_array.append(rect)

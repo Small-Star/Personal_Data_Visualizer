@@ -45,7 +45,7 @@ class Diet_HTML_Parser(HTMLParser):
         self.calorie_intake_re = re.compile(r'\s*Intake: ')
         self.protein_intake_re = re.compile(r'\s*Protein: ')
         self.tdee_re = re.compile(r'\s*Est. TDEE: ')
-        self.fic_re = re.compile(r'\S') #Note, this pattern is used on the BACKWARDS TDEE string
+        self.fic_re = re.compile(r'\S+') #Note, this pattern is used on the BACKWARDS TDEE string
          
     def handle_data(self, data):
         #Line by line parsing of input data
@@ -69,7 +69,7 @@ class Diet_HTML_Parser(HTMLParser):
             node = self.day_nodes.get(self.current_date.toordinal(),day_node(datetime.date(1000,01,01))) #01/01/1000 denotes an error
             tdee_ = int(re.split(self.tdee_re,re.split("kcal",data)[0])[1])#Match pattern, split away extraneous stuff
             node.set_tdee(tdee_)
-            node.set_fic(re.search(self.fic_re,data[::-1]).group())     #Pulls out the endmost non-whitespace character
+            node.set_fic(re.search(self.fic_re,data[-2::]).group())     #Pulls out the endmost non-whitespace character(s)
             self.tdee.append(tdee_)
         
     def get_calorie_intake(self):
