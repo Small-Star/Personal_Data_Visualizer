@@ -34,7 +34,9 @@ class Goal_HTML_Parser(HTMLParser):
         self.status_pd_re = re.compile(r'PARTIALLY DONE - ')    #ex: 'PARTIALLY DONE - blahblahblah'
                 
     def handle_data(self, data):
-        if re.match(self.date_str_re,data) != None:
+        if data.strip().lower() == '' or data.strip().lower() == None:
+            pass
+        elif re.match(self.date_str_re,data) != None:
             self.cr_date = datetime.date(int(data[-4:]),int(data[:2]),int(data[3:5]))
         elif re.match(self.goal_str_re,data) != None:
             self.lines.append((self.cr_date.__str__(),'GOALDESC',data[1:]))  #Removes prefixed newline
@@ -49,7 +51,9 @@ class Goal_HTML_Parser(HTMLParser):
         elif re.match(self.status_pd_re,data) != None:            #PARTIALLY DONE
             self.lines.append((self.cr_date.__str__(),'STATUS',data[:14]))  
             self.lines.append((self.cr_date.__str__(),'STATUSDESC',data[17:]))  
-            
+        elif data.strip().lower() != ('status:' or '' or "-"):
+            print "Unknown Goal data (" + str(self.cr_date) + ")-" + str(len(data)) + '-' + data + '-'
+                
     def get_goals(self):
         for line in range(len(self.lines)):
             try:
