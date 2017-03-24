@@ -122,8 +122,12 @@ class Weightlifting_HTML_Parser(HTMLParser):
                 bnode.get_workout().add_cardio(self.lines[line][2]) 
             elif self.lines[line][1] == 'LIFT':            
                 bnode.get_workout().add_lift(self.lines[line][2])
-                
-        day_nodes[self.lines[-1][0].toordinal()].set_bnode(bnode)                    #Pin the final body node         
+
+        try:
+            day_nodes[self.lines[-1][0].toordinal()].set_bnode(bnode)                    #Pin the final body node
+        except KeyError:
+            print "KeyError on: " + str(self.lines[-1][0])
+            
         return day_nodes
 
 def read_weightlifting_records(drive_path = DRIVE_PATH, day_nodes = {}):
